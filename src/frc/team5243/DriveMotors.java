@@ -11,27 +11,36 @@ import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import edu.wpi.first.wpilibj.Victor;
 
 public enum DriveMotors {
-    BACK_LEFT(0, 1), BACK_RIGHT(2, 3), FRONT_LEFT(4, 5), FRONT_RIGHT(6, 7);
+    BACK_LEFT(0, 1, true), BACK_RIGHT(2, 3, false), FRONT_LEFT(4, 5, false), FRONT_RIGHT(6, 7, false);
 
     private final TalonSRX spiny;
+    private final TalonSRX movyTalon; //This is used only for one of the motors as a replacement for a Victor
     private final Victor movy;
     private final int spinnyPort;
     private final int movyPort;
 
-    DriveMotors(int spinnyPort, int movyPort) {
+    DriveMotors(int spinnyPort, int movyPort, boolean dualTalons) {
         this.spinnyPort = spinnyPort;
         this.movyPort = movyPort;
 
         spiny = new TalonSRX(getSpinnyPort());
-        movy = new Victor(getMovyPort());
+
+        if (dualTalons) {
+            movyTalon = new TalonSRX(getMovyPort());
+            movy = null;
+        } else {
+            movyTalon = null;
+            movy = new Victor(getMovyPort());
+        }
     }
 
     public TalonSRX getSpiny() {
         return spiny;
     }
 
-    public Victor getMovy() {
-        return movy;
+    //NOTE: The returned value must be casted to be fully used
+    public Object getMovy() {
+        return movy != null ? movy : movyTalon;
     }
 
     public int getSpinnyPort() {
